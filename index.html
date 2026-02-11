@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Kiss Day</title>
+
+<style>
+body{
+  margin:0;
+  overflow:hidden;
+  background:black;
+  font-family:'Segoe UI',sans-serif;
+  color:white;
+}
+
+#canvas{
+  position:fixed;
+  inset:0;
+}
+
+/* Scene */
+#scene{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  text-align:center;
+  backdrop-filter: blur(8px);
+  transition: background 3s ease;
+}
+
+/* Text */
+.text{
+  font-size:2.2em;
+  opacity:0;
+  transition: opacity 2s ease, transform 2s ease;
+  transform: scale(1.05);
+}
+.show{
+  opacity:1;
+  transform: scale(1);
+}
+
+/* Heart Game */
+#heart{
+  font-size:120px;
+  color:#ff3366;
+  cursor:pointer;
+  text-shadow:0 0 30px #ff3366;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.glow{
+  transform:scale(1.2);
+  text-shadow:0 0 60px #ff6699;
+}
+
+#gameText{
+  font-size:1.8em;
+  min-height:60px;
+  margin-bottom:15px;
+}
+
+#progress{
+  font-size:1.5em;
+  margin-top:15px;
+  letter-spacing:6px;
+}
+
+/* Final Mode */
+.finalMode{
+  background: radial-gradient(circle at center, rgba(120,0,80,0.6), black);
+}
+
+.pulse{
+  animation:pulse 4s infinite;
+}
+@keyframes pulse{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.05);}
+  100%{transform:scale(1);}
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="canvas"></canvas>
+
+<audio autoplay loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_50bdbb63d1.mp3">
+</audio>
+
+<div id="scene">
+
+  <!-- GAME -->
+  <div id="game">
+    <div id="gameText">Match my heartbeat… if you can.</div>
+    <div id="heart">❤</div>
+    <div id="progress">♡ ♡ ♡ ♡ ♡</div>
+    <p>Touch only when it starts to glow.</p>
+  </div>
+
+  <!-- STORY -->
+  <div id="story" style="display:none;">
+    <div id="textBox" class="text"></div>
+  </div>
+
+</div>
+
+<script>
+/* HEART GAME LOGIC */
+let beats = 0;
+let glowing = false;
+
+const heart = document.getElementById("heart");
+const gameText = document.getElementById("gameText");
+const progress = document.getElementById("progress");
+const game = document.getElementById("game");
+const story = document.getElementById("story");
+const textBox = document.getElementById("textBox");
+const scene = document.getElementById("scene");
+
+function pulseHeart(){
+  glowing = true;
+  heart.classList.add("glow");
+
+  setTimeout(()=>{
+    heart.classList.remove("glow");
+    glowing = false;
+  },400);
+}
+
+setInterval(pulseHeart, 1200);
+
+heart.addEventListener("click", ()=>{
+  if(glowing){
+    beats++;
+    updateProgress();
+    gameText.innerText="Closer… keep syncing.";
+
+    if(beats >= 5){
+      finishGame();
+    }
+  } else {
+    gameText.innerText="Not yet… wait for the glow.";
+  }
+});
+
+function updateProgress(){
+  let filled = "♥ ".repeat(beats);
+  let empty = "♡ ".repeat(5 - beats);
+  progress.innerHTML = filled + empty;
+}
+
+function finishGame(){
+  game.style.display="none";
+  story.style.display="block";
+  showNext();
+}
+
+/* STORY MESSAGES */
+const messages = [
+  "SECRET LETTERS OF THE DAY: MORROW",
+  "Message unlocked:<br><br>Time ⏱️ stops for one reason when I<br>HUG U 2-MORROW",
+  "This was never just a game.",
+  "It was a slow walk toward something unspoken.",
+  "Every choice led here…",
+  "HAPPY KISS DAY GRAVITY :*<br>The first kiss will not be just lips meeting."
+];
+
+let i = 0;
+
+function showNext(){
+  if(i < messages.length){
+    textBox.classList.remove("show");
+    setTimeout(()=>{
+      textBox.innerHTML = messages[i];
+      textBox.classList.add("show");
+
+      if(messages[i].includes("HAPPY KISS DAY")){
+        scene.classList.add("finalMode","pulse");
+        startHearts();
+      }
+
+      i++;
+      setTimeout(showNext,3500);
+    },2000);
+  }
+}
+
+/* BACKGROUND PARTICLES */
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let particles = [];
+
+function startHearts(){
+  for(let i=0;i<40;i++){
+    particles.push({
+      x:Math.random()*canvas.width,
+      y:canvas.height+Math.random()*200,
+      r:Math.random()*20+10,
+      dy:Math.random()*0.8+0.3
+    });
+  }
+}
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle="rgba(255,120,180,0.5)";
+    ctx.fill();
+    p.y -= p.dy;
+    if(p.y < 0) p.y = canvas.height + 50;
+  });
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+
+</body>
+</html>
