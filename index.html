@@ -60,6 +60,15 @@ body{
 #gameText{
   font-size:1.8em;
   min-height:60px;
+  margin-bottom:10px;
+}
+
+#whisper{
+  font-size:1.2em;
+  opacity:0;
+  transition: opacity 1.5s ease;
+  color:#ff99bb;
+  font-style:italic;
   margin-bottom:15px;
 }
 
@@ -98,6 +107,7 @@ body{
   <!-- GAME -->
   <div id="game">
     <div id="gameText">Match my heartbeat… if you can.</div>
+    <div id="whisper"></div>
     <div id="heart">❤</div>
     <div id="progress">♡ ♡ ♡ ♡ ♡</div>
     <p>Touch only when it starts to glow.</p>
@@ -118,10 +128,20 @@ let glowing = false;
 const heart = document.getElementById("heart");
 const gameText = document.getElementById("gameText");
 const progress = document.getElementById("progress");
+const whisper = document.getElementById("whisper");
 const game = document.getElementById("game");
 const story = document.getElementById("story");
 const textBox = document.getElementById("textBox");
 const scene = document.getElementById("scene");
+
+const whispers = ["again…", "closer…", "don’t rush…", "feel it…"];
+
+function showWhisper(){
+  const text = whispers[Math.floor(Math.random()*whispers.length)];
+  whisper.innerText = text;
+  whisper.style.opacity = 1;
+  setTimeout(()=> whisper.style.opacity = 0, 1500);
+}
 
 function pulseHeart(){
   glowing = true;
@@ -140,6 +160,12 @@ heart.addEventListener("click", ()=>{
     beats++;
     updateProgress();
     gameText.innerText="Closer… keep syncing.";
+    showWhisper();
+
+    // Mobile vibration
+    if(navigator.vibrate){
+      navigator.vibrate(80);
+    }
 
     if(beats >= 5){
       finishGame();
@@ -164,7 +190,7 @@ function finishGame(){
 /* STORY MESSAGES */
 const messages = [
   "SECRET LETTERS OF THE DAY: MORROW",
-  "Message unlocked:<br><br>Time ⏱️ stops for one reason when I<br>HUG U 2-MORROW",
+  "**************MYSTERY SOLVED**************<br><br><b>Time ⏱️ stops for one reason when I<br>HUG U 2-MORROW",
   "This was never just a game.",
   "It was a slow walk toward something unspoken.",
   "Every choice led here…",
